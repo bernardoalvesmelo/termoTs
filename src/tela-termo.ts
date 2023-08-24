@@ -1,4 +1,4 @@
-import { Termo } from "./termo.js";
+import { Termo, resultadoEnum } from "./termo.js";
 
 class telaTermo {
     pnlTermo: HTMLDivElement;
@@ -10,6 +10,8 @@ class telaTermo {
     coluna: number;
     termo: Termo;
 
+    botoesClicados: HTMLButtonElement[];
+
     constructor() {
         this.pnlTermo = document.getElementById('pnlTermo') as HTMLDivElement;
         this.pnlTeclado = document.getElementById('pnlTeclado') as HTMLDivElement;
@@ -19,6 +21,8 @@ class telaTermo {
         this.linha = 0;
         this.coluna = 0;
         this.termo = new Termo();
+
+        this.botoesClicados = [];
 
         this.registrarEventos();
     }
@@ -41,14 +45,16 @@ class telaTermo {
             return;
         }
 
+        this.botoesClicados.push(botao);
+
         const lista = document.querySelectorAll(".letra");
-        
+
         const letra: HTMLDivElement =
             lista[this.coluna * 5 + this.linha] as HTMLDivElement;
 
         letra.textContent = botao.textContent;
 
-        this.linha += 1;
+        this.linha++;
     }
 
     avaliarPalavra(): void {
@@ -65,54 +71,57 @@ class telaTermo {
 
         const lista = document.querySelectorAll(".letra");
 
-        for(let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
+        for (let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
             palavra += (lista[i] as HTMLDivElement).textContent;
         }
 
-        const resultado: string = this.termo.verificacaoPalavra(palavra);
+        const resultado: resultadoEnum[] = this.termo.verificacaoPalavra(palavra);
 
-        this.atualizarEstilo(resultado.split(''));
+        this.atualizarEstilo(resultado);
 
-        this.coluna += 1;
+        this.coluna++;
         this.linha = 0;
 
         this.verificarResultado();
     }
 
-    atualizarEstilo(palavra: string[]) {
+    atualizarEstilo(resultado: resultadoEnum[]) {
         const lista = document.querySelectorAll(".letra");
 
         let j = 0;
-        for(let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
+        for (let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
             const celula = lista[i] as HTMLDivElement;
 
-            if (palavra[j] == 'T') {
+            if (resultado[j] == resultadoEnum.Acerto) {
                 celula.style.backgroundColor = "#22dd55";
             }
 
-            else if (palavra[j] == 'C') {
+            else if (resultado[j] == resultadoEnum.Contido) {
                 celula.style.backgroundColor = "#eded00";
             }
 
             else {
                 celula.style.backgroundColor = "#5e5e5e";
+                this.botoesClicados[j].disabled = true;
             }
 
             j++;
         }
+
+        this.botoesClicados = [];
     }
 
     verificarResultado(): void {
-        const resultado = this.termo.obterResultado();
-
-        if (resultado == "") {
+        if (!this.termo.fimDeJogo()) {
             return;
         }
+
+        const resultado = this.termo.obterResultado();
 
         this.lbNotificacao.style.display = "inline";
         this.lbNotificacao.textContent = resultado;
 
-        if(resultado == "Você venceu!") {
+        if (this.termo.venceu) {
             this.lbNotificacao.className = "notificacao-acerto";
         }
 
@@ -140,13 +149,14 @@ class telaTermo {
 
         const lista = document.querySelectorAll(".letra");
 
-        for(let i = 0; i < lista.length; i++) {
+        for (let i = 0; i < lista.length; i++) {
             const celula = lista[i] as HTMLDivElement;
             celula.textContent = "";
             celula.style.backgroundColor = "#bebebe";
         }
 
         this.lbNotificacao.style.display = "none";
+        this.botoesClicados = [];
     }
 }
 

@@ -1,4 +1,4 @@
-import { Termo } from "./termo.js";
+import { Termo, resultadoEnum } from "./termo.js";
 class telaTermo {
     constructor() {
         this.pnlTermo = document.getElementById('pnlTermo');
@@ -8,6 +8,7 @@ class telaTermo {
         this.linha = 0;
         this.coluna = 0;
         this.termo = new Termo();
+        this.botoesClicados = [];
         this.registrarEventos();
     }
     registrarEventos() {
@@ -24,10 +25,11 @@ class telaTermo {
         if (this.linha == 5) {
             return;
         }
+        this.botoesClicados.push(botao);
         const lista = document.querySelectorAll(".letra");
         const letra = lista[this.coluna * 5 + this.linha];
         letra.textContent = botao.textContent;
-        this.linha += 1;
+        this.linha++;
     }
     avaliarPalavra() {
         if (this.termo.jogoAcabou) {
@@ -43,36 +45,38 @@ class telaTermo {
             palavra += lista[i].textContent;
         }
         const resultado = this.termo.verificacaoPalavra(palavra);
-        this.atualizarEstilo(resultado.split(''));
-        this.coluna += 1;
+        this.atualizarEstilo(resultado);
+        this.coluna++;
         this.linha = 0;
         this.verificarResultado();
     }
-    atualizarEstilo(palavra) {
+    atualizarEstilo(resultado) {
         const lista = document.querySelectorAll(".letra");
         let j = 0;
         for (let i = this.coluna * 5; i < this.coluna * 5 + 5; i++) {
             const celula = lista[i];
-            if (palavra[j] == 'T') {
+            if (resultado[j] == resultadoEnum.Acerto) {
                 celula.style.backgroundColor = "#22dd55";
             }
-            else if (palavra[j] == 'C') {
+            else if (resultado[j] == resultadoEnum.Contido) {
                 celula.style.backgroundColor = "#eded00";
             }
             else {
                 celula.style.backgroundColor = "#5e5e5e";
+                this.botoesClicados[j].disabled = true;
             }
             j++;
         }
+        this.botoesClicados = [];
     }
     verificarResultado() {
-        const resultado = this.termo.obterResultado();
-        if (resultado == "") {
+        if (!this.termo.fimDeJogo()) {
             return;
         }
+        const resultado = this.termo.obterResultado();
         this.lbNotificacao.style.display = "inline";
         this.lbNotificacao.textContent = resultado;
-        if (resultado == "Você venceu!") {
+        if (this.termo.venceu) {
             this.lbNotificacao.className = "notificacao-acerto";
         }
         else {
@@ -100,6 +104,7 @@ class telaTermo {
             celula.style.backgroundColor = "#bebebe";
         }
         this.lbNotificacao.style.display = "none";
+        this.botoesClicados = [];
     }
 }
 window.addEventListener('load', () => new telaTermo());

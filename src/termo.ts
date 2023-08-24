@@ -1,10 +1,18 @@
+export enum resultadoEnum {
+    Acerto,
+    Contido,
+    Erro
+}
+
 export class Termo {
 
     palavras: string[];
     palavraSecreta: string[];
-    letrasDescobertas: string[];
+    letrasDescobertas: resultadoEnum[];
     tentativas: number;
     jogoAcabou: boolean;
+    venceu: boolean;
+    resultado: string;
 
     constructor() {
         this.iniciarValores();
@@ -14,38 +22,44 @@ export class Termo {
         this.palavras = this.criarArrayPalavras();
         this.palavraSecreta =
             this.formatarPalavra(this.palavras[Math.floor(Math.random() * this.palavras.length)]).split('');
-        this.letrasDescobertas = this.palavraSecreta.map(p => "_");
+        this.letrasDescobertas = this.palavraSecreta.map(p => resultadoEnum.Erro);
         this.tentativas = 5;
         this.jogoAcabou = false;
+        this.venceu = false;
+        this.resultado = "";
     }
 
-    obterResultado(): string {
-        if (this.letrasDescobertas.join('') == "TTTTT") {
+    fimDeJogo(): boolean {
+        if (this.letrasDescobertas.filter(l => l != resultadoEnum.Acerto).length == 0) {
+            this.venceu = true;
             this.jogoAcabou = true;
-            return "Você venceu!";
+            this.resultado = "Você venceu!";
         }
-        if (this.tentativas == 0) {
+
+        else if (this.tentativas == 0) {
+            this.venceu = false;
             this.jogoAcabou = true;
-            return "Você perdeu! A palavra era " + this.palavraSecreta.join('').toUpperCase();
+            this.resultado = "Você perdeu! A palavra era " + this.palavraSecreta.join('').toUpperCase();
         }
-        return "";
+
+        return this.jogoAcabou;
     }
 
-    verificacaoPalavra(palavra: string) {
+    verificacaoPalavra(palavra: string): resultadoEnum[] {
         palavra = palavra.toLowerCase();
         for (let i = 0; i < this.palavraSecreta.length; i++) {
             if (palavra[i] == this.palavraSecreta[i]) {
-                this.letrasDescobertas[i] = 'T';
+                this.letrasDescobertas[i] = resultadoEnum.Acerto;
             }
             else if (this.palavraSecreta.includes(palavra[i])) {
-                this.letrasDescobertas[i] = 'C';
+                this.letrasDescobertas[i] = resultadoEnum.Contido;
             }
             else {
-                this.letrasDescobertas[i] = 'F';
+                this.letrasDescobertas[i] = resultadoEnum.Erro;
             }
         }
         this.tentativas--;
-        return this.letrasDescobertas.join('');
+        return this.letrasDescobertas;
     }
 
     criarArrayPalavras(): string[] {
@@ -105,5 +119,9 @@ export class Termo {
 
     obterTentativas(): number {
         return this.tentativas;
+    }
+
+    obterResultado(): string {
+        return this.resultado;
     }
 }
