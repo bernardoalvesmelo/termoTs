@@ -31,6 +31,7 @@ export class Termo {
 
     fimDeJogo(): boolean {
         if (this.letrasDescobertas.filter(l => l != resultadoEnum.Acerto).length == 0) {
+            this.tentativas++;
             this.venceu = true;
             this.jogoAcabou = true;
             this.resultado = "Você venceu!";

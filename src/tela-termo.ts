@@ -1,10 +1,13 @@
+import { Gravador } from "./gravadorHistorico.js";
 import { Termo, resultadoEnum } from "./termo.js";
+
 
 class telaTermo {
     pnlTermo: HTMLDivElement;
     pnlTeclado: HTMLDivElement;
     btnEnter: HTMLButtonElement;
     lbNotificacao: HTMLParagraphElement;
+    trHistorico: HTMLTableRowElement;
 
     linha: number;
     coluna: number;
@@ -12,19 +15,28 @@ class telaTermo {
 
     botoesClicados: HTMLButtonElement[];
 
+    gravador: Gravador;
+    historico: number[];
+
     constructor() {
         this.pnlTermo = document.getElementById('pnlTermo') as HTMLDivElement;
         this.pnlTeclado = document.getElementById('pnlTeclado') as HTMLDivElement;
         this.btnEnter = document.getElementById('btnEnter') as HTMLButtonElement;
         this.lbNotificacao = document.getElementById('lbNotificacao') as HTMLParagraphElement;
-
+        this.trHistorico = document.getElementById('trHistorico') as HTMLTableRowElement;
+ 
         this.linha = 0;
         this.coluna = 0;
         this.termo = new Termo();
 
         this.botoesClicados = [];
+        this.gravador = new Gravador();
+        this.historico = this.gravador.obterHistorico();
+        this.atualizarHistorico();
 
         this.registrarEventos();
+
+        console.log(this.termo.palavraSecreta.join(''));
     }
 
     registrarEventos(): void {
@@ -135,6 +147,8 @@ class telaTermo {
                 botao.disabled = true;
             }
         });
+
+        this.gravarHistorico();
     }
 
     resetarJogo(): void {
@@ -157,6 +171,24 @@ class telaTermo {
 
         this.lbNotificacao.style.display = "none";
         this.botoesClicados = [];
+
+        this.historico = this.gravador.obterHistorico();
+        console.log(this.termo.palavraSecreta.join(''));
+    }
+
+    gravarHistorico(){
+        this.historico[5 - this.termo.obterTentativas()]++;
+        this.gravador.gravar(this.historico);
+
+        this.atualizarHistorico();
+    }
+
+    atualizarHistorico(){
+        const lista = this.trHistorico.children;
+
+        for(let i = 0; i < lista.length; i++) {
+            lista[i].textContent = "" + this.historico[i];
+        }
     }
 }
 

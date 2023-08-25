@@ -16,6 +16,26 @@ body {
   place-items: center;
 }
 
+.tb-historico {
+  border: 1px solid #a09d9d;
+}
+
+.tb-historico > tr {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tb-historico > tr > th, td{
+ width: 35px;
+ margin: 0;
+ padding: 0;
+ text-align: center;
+ background-color: #32fe5e;
+ color: #2e2e2e;
+ font-weight: 600;
+}
+
+
 .grid-termo {
   display: grid;
   grid-template-rows: repeat(5, 50px);
